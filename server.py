@@ -1,5 +1,6 @@
 #  coding: utf-8 
 import socketserver
+import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -32,7 +33,65 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
+        raw_request = str(self.data).split(' ')
+
+        method = raw_request[0].split("\'")[1]
+        request = raw_request[1]
+        response = ''
+
+        if (method == 'GET'):
+
+            try:
+                header = 'HTTP/1.1 200 OK\n'
+
+                if request[-1] == "/":
+                    request = str(request) + "index.html"
+                
+                #handle 301 redirect
+                if (os.path.isdir("www/" + request) == True and request[-1] != "/") or request[-2:] == "..":
+                    header = 'HTTP/1.1 301 Moved Permanently\n'
+                    location = str(request) + "/"
+                    header += 'Location: ' + str(location) + '\n\n'
+                    request = str(request) + "/index.html"
+                    file = open(("www/" + request), 'rb')
+                    response = file.read()
+                    file.close()
+                    final_response = header.encode('utf-8')
+                    if response != '':
+                        final_response += response
+                    self.request.sendall(final_response)
+                    return
+
+                file = open(("www/" + request), 'rb')
+
+                server_dir = os.getcwd()
+                abs_file_path = os.path.dirname(os.path.realpath(file.name))
+                if abs_file_path.startswith(server_dir) == True:
+                    response = file.read()
+                    file.close()
+
+                if request.endswith(".css"):
+                    mimetype = 'text/css'
+                elif request.endswith(".html"):
+                    mimetype = 'text/html'
+
+                header += 'Content-Type: ' + str(mimetype)+'\n\n'
+
+            except:
+                header = 'HTTP/1.1 404 Not Found\n\n'
+                response = '<html><body><center><h3>Error 404: Not Found</h3><p>Raise your Truongers xd</p></center></body></html>'.encode('utf-8')
+
+        else:
+            header = 'HTTP/1.1 405 Not Allowed\n\n'
+            response = '<html><body><center><h3>Error 405: Method Not Allowed</h3><p>Raise your Truongers xd</p></center></body></html>'.encode('utf-8')
+
+        final_response = header.encode('utf-8')
+        if response != '':
+            final_response += response
+        self.request.sendall(final_response)
+
+
+# self.request.sendall(bytearray("OK",'utf-8'))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
