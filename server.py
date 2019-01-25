@@ -48,7 +48,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     request = str(request) + "index.html"
                 
                 #handle 301 redirect
-                if (os.path.isdir("www/" + request) == True and request[-1] != "/") or request[-2:] == "..":
+                if (os.path.isdir("www/" + request) == True and request[-1] != "/") or (request[-2:] == ".." and (os.path.isdir("www/" + request) == True)):
                     header = 'HTTP/1.1 301 Moved Permanently\n'
                     location = str(request) + "/"
                     header += 'Location: ' + str(location) + '\n\n'
