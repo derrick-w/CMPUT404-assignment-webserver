@@ -24,8 +24,16 @@ examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
 
-Collaborators (fork dwai):
-shchau1
-hiufungk
-htruong1
-ima
+***Collaborators***:
+
+
+* shchau1
+
+
+* hiufungk
+
+
+* htruong1
+
+
+* ima
